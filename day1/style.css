@@ -13,6 +13,14 @@ body {
     cursor: pointer;
 }
 
+#bold {
+    font-weight: bold;
+}
+
+#italic {
+    font-style: italic;
+}
+
 .formula-bar {
     display: flex;
     padding: 10px;
@@ -27,4 +35,39 @@ body {
 #formula {
     flex: 1;
     height: 25px;
+}
+
+
+.grid-container {
+    display: grid;
+    grid-template-columns: 50px auto;
+    grid-template-rows: 30px auto;
+    height: calc(100vh - 80px);
+}
+
+.top-row {
+    grid-column: 2;
+    display: flex;
+}
+
+.left-col {
+    grid-row: 2;
+}
+
+.cells {
+    grid-column: 2;
+    grid-row: 2;
+    overflow: auto;
+}
+
+
+.cell {
+    width: 100px;
+    height: 25px;
+    border: 1px solid #ccc;
+    padding: 3px;
+}
+
+.row {
+    display: flex;
 }

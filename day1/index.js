@@ -1,4 +1,4 @@
-// Google sheet
+// Google sheet'clone
 // Our goal:
 // 1. cell's value editing.
 // 2. formulla writting section
@@ -28,4 +28,88 @@
 //  click on the cell whose value u want to format.
 // then click on the respective formatting button.
 
+// data handling.
+const rows = 100;
+const cols = 26;
+let sheetDB = [];
+let selectedCell = null;
+function createSheetDB() {
+  for (let i = 0; i < rows; i++) {
+    let row = [];
+    for (let j = 0; j < cols; j++) {
+      row.push({
+        value: "",
+        formula: "",
+        children: [],
+        parents: [],
+      });
+    }
+    sheetDB.push(row);
+  }
+}
 
+createSheetDB();
+
+// I am generating grid header.
+const topRow = document.querySelector(".top-row");
+const leftCol = document.querySelector(".left-col");
+const cellsContainer = document.querySelector(".cells");
+
+// console.log(topRow, leftCol, cellsContainer);
+
+function generateHeaders() {
+  // generate columns header
+  for (let i = 0; i < 26; i++) {
+    let cell = document.createElement("div");
+    cell.textContent = String.fromCharCode(65 + i);
+    cell.classList.add("cell");
+    topRow.appendChild(cell);
+  }
+
+  // generate row headers.
+  for (let i = 0; i < 100; i++) {
+    let cell = document.createElement("div");
+    cell.textContent = i + 1;
+    cell.classList.add("cell");
+    leftCol.appendChild(cell);
+  }
+}
+
+function generateCells() {
+  for (let i = 0; i < rows; i++) {
+    let rowDiv = document.createElement("div");
+    rowDiv.classList.add("row");
+
+    for (let j = 0; j < cols; j++) {
+      let cell = document.createElement("div");
+      cell.classList.add("cell");
+      cell.setAttribute("rid", i);
+      cell.setAttribute("cid", j);
+      cell.contentEditable = "true";
+      rowDiv.appendChild(cell);
+
+      cell.addEventListener("click", function () {
+        selectedCell = cell;
+      });
+    }
+    cellsContainer.appendChild(rowDiv);
+  }
+}
+
+generateHeaders();
+generateCells();
+
+const boldBtn = document.getElementById("bold");
+const italicBtn = document.getElementById("italic");
+
+boldBtn.addEventListener("click", function () {
+  if (selectedCell) {
+    selectedCell.style.fontWeight = "bold";
+  }
+});
+
+italicBtn.addEventListener("click", function () {
+  if (selectedCell) {
+    selectedCell.style.fontStyle = "italic";
+  }
+});
