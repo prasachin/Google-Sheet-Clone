@@ -1,0 +1,7 @@
+{
+  "user": {
+    "name": "sachin",
+    "age": 30,
+    "roles": ["admin", "editor"]
+  }
+}

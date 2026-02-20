@@ -1,0 +1,30 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.toolbar {
+    padding: 10px;
+}
+
+.toolbar button {
+    margin-right: 10px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.formula-bar {
+    display: flex;
+    padding: 10px;
+    gap: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+#address {
+    width: 60px;
+}
+
+#formula {
+    flex: 1;
+    height: 25px;
+}
