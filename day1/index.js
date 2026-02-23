@@ -90,6 +90,9 @@ function generateCells() {
 
       cell.addEventListener("click", function () {
         selectedCell = cell;
+        let ele = document.getElementById("address");
+        let address = String.fromCharCode(65 + j) + (i + 1);
+        ele.value = address;
       });
     }
     cellsContainer.appendChild(rowDiv);
@@ -113,3 +116,101 @@ italicBtn.addEventListener("click", function () {
     selectedCell.style.fontStyle = "italic";
   }
 });
+
+function removeDependencies(rid, cid) {
+  let parents = sheetDB[rid][cid].parents;
+  parents.forEach(({ rid: pr, cid: pc }) => {
+    sheetDB[pr][pc].children = sheetDB[pr][pc].children.filter(
+      (child) => !(child.childRID == rid && child.childCID == cid),
+    );
+  });
+  sheetDB[rid][cid].parents = [];
+}
+
+function addDependencies(formula, childRID, childCID) {
+  let tokens = formula.split(" ");
+  tokens.forEach((token) => {
+    if (/^[A-Z][0-9]+$/.test(token)) {
+      let { rid, cid } = getRIDCID(token);
+      sheetDB[rid][cid].children.push({ childRID, childCID });
+      sheetDB[childRID][childCID].parents.push({ rid, cid });
+    }
+  });
+}
+
+function updateChildren(rid, cid) {
+  let children = sheetDB[rid][cid].children;
+  children.forEach((child) => {
+    let childobj = sheetDB[child.childRID][child.childCID];
+    let newval = evaluateFormula(childobj.formula);
+    childobj.value = newval;
+    updateCellUI(child.childRID, child.childCID, newval);
+    updateChildren(child.childRID, child.childCID);
+  });
+}
+
+function updateCellUI(rid, cid, value) {
+  let cell = document.querySelector(`.cell[rid="${rid}"][cid="${cid}"]`);
+  if (cell) cell.textContent = value;
+}
+
+cellsContainer.addEventListener(
+  "blur",
+  function (e) {
+    let cell = e.target;
+    if (!cell.classList.contains("cell")) return;
+    let rid = Number(cell.getAttribute("rid"));
+    let cid = Number(cell.getAttribute("cid"));
+    let value = cell.textContent;
+    if (sheetDB[rid][cid].formula) {
+      removeDependencies(rid, cid);
+    }
+    sheetDB[rid][cid].formula = "";
+    sheetDB[rid][cid].value = value;
+    updateChildren(rid, cid);
+  },
+  true,
+);
+let formulaInput = document.getElementById("formula");
+
+formulaInput.addEventListener("keydown", function (e) {
+  if (e.key == "Enter") {
+    let address = document.getElementById("address").value;
+    let formula = formulaInput.value;
+    if (!address) return;
+    let { rid, cid } = getRIDCID(address);
+    if (sheetDB[rid][cid].formula) {
+      removeDependencies(rid, cid);
+    }
+    let value = evaluateFormula(formula);
+    sheetDB[rid][cid].value = value;
+    addDependencies(formula, rid, cid);
+    updateCellUI(rid, cid, value);
+    updateChildren(rid, cid);
+  }
+});
+
+function evaluateFormula(formula) {
+  if (!formula) return "";
+  let tokens = formula.split(" ");
+  for (let i = 0; i < tokens.length; i++) {
+    if (/^[A-Z][0-9]+$/.test(tokens[i])) {
+      let { rid, cid } = getRIDCID(tokens[i]);
+      let value = sheetDB[rid][cid].value || 0;
+      tokens[i] = value === "" ? 0 : value;
+    }
+  }
+  let expression = tokens.join(" ");
+  try {
+    return eval(expression);
+  } catch (error) {
+    console.error("Error evaluating formula:", error);
+    return "error";
+  }
+}
+
+function getRIDCID(add) {
+  let cid = add.charCodeAt(0) - 65;
+  let rid = Number(add.slice(1)) - 1;
+  return { rid, cid };
+}
