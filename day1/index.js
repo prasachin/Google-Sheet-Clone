@@ -214,3 +214,9 @@ function getRIDCID(add) {
   let rid = Number(add.slice(1)) - 1;
   return { rid, cid };
 }
+
+let clear = document.getElementById("clear");
+clear.addEventListener("click", function () {
+  let inputBar = document.getElementById("formula");
+  inputBar.value = "";
+});
